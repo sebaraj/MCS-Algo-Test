@@ -1,1 +1,3 @@
-### C++ Library Template for CMake, Conan, Ninja, GTest, and Doxygen
+## MCS Testing Framework
+
+### Part of CPSC 4900 - Yale Senior EECS Thesis
