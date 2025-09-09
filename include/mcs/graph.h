@@ -125,7 +125,7 @@ public:
     bool change_edge_weight(const std::string& from_id, const std::string& to_id, int new_weight);
 
     /**
-     * @brief Retrieves a copy of the node with the given ID
+     * @brief Retrieves the node identified by the given ID
      * @param id Unique identifier of the node to retrieve.
      * @return Pointer to the Node if found, nullptr otherwise.
      */
@@ -137,6 +137,12 @@ public:
      */
     [[nodiscard]]
     inline int get_num_nodes() const;
+
+    /**
+     * @brief Equality operator to compare two graphs.
+     * @return True if the graphs are equal, false otherwise.
+     */
+    bool operator==(const Graph& other) const;
 };
 
 #endif  // GRAPH_H

@@ -143,6 +143,21 @@ public:
      */
     [[nodiscard]]
     inline bool is_sink() const;
+
+    /**
+     * @brief Equality operator to compare two nodes based on their ID, parent count, child count,
+     * and edges.
+     * @return True if the nodes are equal, false otherwise.
+     */
+    bool operator==(const Node& other) const;
+
+    /**
+     * @brief Compares two nodes based on their unique identifiers.
+     * @param other The node to compare with.
+     * @return True if the nodes have the same ID, false otherwise.
+     */
+    [[nodiscard]]
+    bool same_id(const Node& other) const;
 };
 
 #endif  // NODE_H
