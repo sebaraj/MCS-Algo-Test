@@ -158,6 +158,12 @@ public:
      * @return Reference to the output stream.
      */
     friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
+
+    /**
+     * @brief Generates a DOT file representing the graph for visualization.
+     * @param filename Name of the output graph name
+     */
+    void generate_diagram_file(const std::string& graph_name) const;
 };
 
 #endif  // GRAPH_H

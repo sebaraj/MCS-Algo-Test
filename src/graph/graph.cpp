@@ -1,7 +1,11 @@
 #include <mcs/graph.h>
 
 #include <cstddef>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
+
+#include "time.h"
 
 Graph::Graph() = default;
 
@@ -194,4 +198,23 @@ std::ostream& operator<<(std::ostream& os, const Graph& graph) {
         os << node << "\n";
     }
     return os;
+}
+
+void Graph::generate_diagram_file(const std::string& graph_name) const {
+    // https://www.graphviz.org/pdf/dotguide.pdf
+    std::string filename = currentDateTime() + "_" + graph_name + ".gv";
+    std::string path = "diagrams/" + filename;
+    std::ofstream outputFile(path);
+
+    outputFile << "digraph G {\n";
+    for (const auto& [_, node] : nodes) {
+        for (const auto& [child, weight] : node->get_children()) {
+            outputFile << "    " << std::quoted(node->get_id()) << " -> "
+                       << std::quoted(child->get_id()) << " [label=\"" << weight << "\"];\n";
+        }
+    }
+    outputFile << "}\n";
+    outputFile.close();
+
+    system(("dot -Tpng " + filename + " -o diagrams/" + filename + ".png").c_str());
 }

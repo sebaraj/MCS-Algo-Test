@@ -1,5 +1,7 @@
 #include <mcs/node.h>
 
+#include <iomanip>
+
 Node::Node(std::string id, int num_parents, int num_children)
     : id(std::move(id)), num_parents(num_parents), num_children(num_children) {};
 
@@ -124,7 +126,7 @@ void Node::print_children() const {
     }
     sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
     for (const auto key : keys) {
-        std::cout << key->id << "(" << children.at(key) << ") ";
+        std::cout << std::quoted(key->id) << "(" << children.at(key) << ") ";
     }
     std::cout << "}\n";
 }
