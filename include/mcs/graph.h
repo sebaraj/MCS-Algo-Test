@@ -138,6 +138,9 @@ public:
     [[nodiscard]]
     inline int get_num_nodes() const;
 
+    [[nodiscard]]
+    const std::unordered_map<std::string, Node*>& get_nodes() const;
+
     /**
      * @brief Equality operator to compare two graphs.
      * @return True if the graphs are equal, false otherwise.

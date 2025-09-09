@@ -1,5 +1,7 @@
 #include <mcs/graph.h>
 
+#include <iostream>
+
 Graph::Graph() = default;
 
 Graph::Graph(const std::vector<Node>& node_list) {
@@ -66,7 +68,7 @@ bool Graph::is_dag() {
         visited_count++;
 
         Node* node = nodes[node_id];
-        for (const auto& child_pair : node->children) {
+        for (const auto& child_pair : node->get_children()) {
             Node* child = child_pair.first;
             in_degree[child->get_id()]--;
             if (in_degree[child->get_id()] == 0) {
@@ -83,7 +85,7 @@ void Graph::print_graph() const {
         const Node* node = pair.second;
         std::cout << node->get_id() << ": [";
         bool first = true;
-        for (const auto& child_pair : node->children) {
+        for (const auto& child_pair : node->get_children()) {
             if (!first) {
                 std::cout << ", ";
             }
@@ -102,6 +104,14 @@ bool Graph::add_node(const std::string& id) {
     return true;
 }
 
+// void Graph::remove_from_list(const std::string& id) {
+//     auto it = nodes.find(id);
+//     if (it != nodes.end()) {
+//         delete it->second;
+//         nodes.erase(it);
+//     }
+// }
+
 bool Graph::remove_node(const std::string& id) {
     auto it = nodes.find(id);
     if (it == nodes.end()) {
@@ -112,10 +122,11 @@ bool Graph::remove_node(const std::string& id) {
 
     for (auto& pair : nodes) {
         Node* node = pair.second;
-        if (node->children.find(node_to_remove) != node->children.end()) {
-            node->children.erase(node_to_remove);
-            node->num_children--;
-            node_to_remove->num_parents--;
+        const auto& children = node->get_children();
+        if (children.find(node_to_remove) != children.end()) {
+            node->remove_edge(node_to_remove);
+            node->decrement_children();
+            node_to_remove->decrement_parents();
         }
     }
 
@@ -162,12 +173,14 @@ Node* Graph::get_node(const std::string& id) const {
 
 inline int Graph::get_num_nodes() const { return nodes.size(); }
 
+const std::unordered_map<std::string, Node*>& Graph::get_nodes() const { return nodes; }
+
 bool operator==(const Graph& lhs, const Graph& rhs) {
     if (lhs.get_num_nodes() != rhs.get_num_nodes()) {
         return false;
     }
 
-    for (const auto& pair : lhs.nodes) {
+    for (const auto& pair : lhs.get_nodes()) {
         const std::string& node_id = pair.first;
         Node* lhs_node = pair.second;
         Node* rhs_node = rhs.get_node(node_id);

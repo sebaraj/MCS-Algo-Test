@@ -10,8 +10,8 @@
 
 #include <vector>
 
+#include "../src/algorithms/mcis_finder.h"
 #include "graph.h"
-#include "src/algorithms/mcis_finder.h"
 
 enum class AlgorithmType { BRON_KERBOSCH_SERIAL, FILLER };
 

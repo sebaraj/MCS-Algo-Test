@@ -1,15 +1,15 @@
 include(GoogleTest)
-add_executable(test
+add_executable(tests
   test.cpp
 )
 
-target_link_libraries(test
+target_link_libraries(tests
   PRIVATE
-    src_lib
+    mcs
     ${CONAN_LIBS}
     ${GTest_LIBRARIES}
     GTest::gtest
     GTest::gtest_main
 )
 
-gtest_discover_tests(test)
+gtest_discover_tests(tests)

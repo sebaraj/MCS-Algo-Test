@@ -5,13 +5,15 @@
  * @section DESCRIPTION
  */
 
-#include "src/algorithms/bron_kerbosch_serial.h"
+#include "mcs/mcis_algorithm.h"
+#include "bron_kerbosch_serial.h"
+#include <iostream>
 
 MCISAlgorithm::MCISAlgorithm() { algorithms.push_back(new BronKerboschSerial()); }
 
 MCISAlgorithm::~MCISAlgorithm() {
-    for (auto algo : algorithms) {
-        delete algo;
+    for (auto algorithm : algorithms) {
+        delete algorithm;
     }
 }
 

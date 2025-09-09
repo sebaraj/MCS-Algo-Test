@@ -14,7 +14,7 @@
 
 class MCISFinder {
 public:
-    virtual std::vector<Graph&> find(const Graph& g1, const Graph& g2) = 0;
+    virtual std::vector<Graph*> find(const Graph& g1, const Graph& g2) = 0;
     virtual ~MCISFinder() {};
 };
 

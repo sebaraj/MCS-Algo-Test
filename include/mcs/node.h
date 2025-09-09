@@ -76,7 +76,7 @@ public:
     /**
      * @brief Destructor.
      */
-    ~Node() = default;
+    ~Node();
 
     /**
      * @brief Retrieves the node's unique identifier.
@@ -158,6 +158,23 @@ public:
      */
     [[nodiscard]]
     bool same_id(const Node& other) const;
+
+    /**
+     * @brief Provides access to the children map for external use (e.g., in Graph class).
+     * @return Reference to the children map.
+     */
+    [[nodiscard]]
+    const std::unordered_map<Node*, int>& get_children() const;
+
+    /**
+     * @brief Decrements the number of parent nodes by one.
+     */
+    void decrement_parents();
+
+    /**
+     * @brief Decrements the number of child nodes by one.
+     */
+    void decrement_children();
 };
 
 #endif  // NODE_H

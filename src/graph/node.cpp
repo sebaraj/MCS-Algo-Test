@@ -1,6 +1,6 @@
 #include <mcs/node.h>
 
-Node::Node(std::string id, int num_parents = 0, int num_children = 0)
+Node::Node(std::string id, int num_parents, int num_children)
     : id(std::move(id)), num_parents(num_parents), num_children(num_children) {};
 
 Node::Node(const Node& other)
@@ -40,7 +40,7 @@ Node& Node::operator=(Node&& other) noexcept {
     return *this;
 }
 
-Node::~Node() = default;
+Node::~Node() { children.clear(); }
 
 inline std::string Node::get_id() const { return id; }
 
@@ -85,12 +85,13 @@ inline bool Node::is_source() const { return num_parents == 0; }
 inline bool Node::is_sink() const { return num_children == 0; }
 
 bool operator==(const Node& lhs, const Node& rhs) {
-    bool same = lhs.id == rhs.id && lhs.num_parents == rhs.num_parents
-                && lhs.num_children == rhs.num_children;
+    bool same = lhs.get_num_parents() == rhs.get_num_parents() && lhs.get_id() == rhs.get_id()
+                && lhs.get_num_children() == rhs.get_num_children();
 
-    for (const auto& [child, weight] : lhs.children) {
-        auto it = rhs.children.find(child);
-        if (it == rhs.children.end() || it->second != weight) {
+    for (const auto& [child, weight] : lhs.get_children()) {
+        auto rhs_children = rhs.get_children();
+        auto it = rhs_children.find(child);
+        if (it == rhs_children.end() || it->second != weight) {
             return false;
         }
     }
@@ -98,3 +99,9 @@ bool operator==(const Node& lhs, const Node& rhs) {
 }
 
 bool Node::same_id(const Node& other) const { return id == other.id; }
+
+const std::unordered_map<Node*, int>& Node::get_children() const { return children; }
+
+void Node::decrement_parents() { num_parents--; }
+
+void Node::decrement_children() { num_children--; }
