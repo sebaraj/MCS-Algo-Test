@@ -150,6 +150,14 @@ public:
      * @return True if the graphs are equal, false otherwise.
      */
     bool operator==(const Graph& other) const;
+
+    /**
+     * @brief Stream insertion operator to print the graph.
+     * @param os Output stream.
+     * @param graph Graph to print.
+     * @return Reference to the output stream.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
 };
 
 #endif  // GRAPH_H

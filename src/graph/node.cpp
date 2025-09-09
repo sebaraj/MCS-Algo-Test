@@ -100,6 +100,31 @@ bool Node::same_id(const Node& other) const { return id == other.id; }
 
 const std::unordered_map<Node*, int>& Node::get_children() const { return children; }
 
-void Node::decrement_parents() { num_parents--; }
+std::ostream& operator<<(std::ostream& os, const Node& node) {
+    os << "Node ID: " << node.id << "\n";
+    os << "Number of Parents: " << node.num_parents << "\n";
+    os << "Number of Children: " << node.num_children << "\n";
+    os << "Children:\n";
+    std::vector<Node*> keys(node.children.size());
+    for (const auto& [key, _] : node.children) {
+        keys.push_back(key);
+    }
+    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
+    for (const auto key : keys) {
+        os << "  Child ID: " << key->get_id() << ", Weight: " << node.children.at(key) << "\n";
+    }
+    return os;
+}
 
-void Node::decrement_children() { num_children--; }
+void Node::print_children() const {
+    std::cout << id << " -> { ";
+    std::vector<Node*> keys(children.size());
+    for (const auto& [key, _] : children) {
+        keys.push_back(key);
+    }
+    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
+    for (const auto key : keys) {
+        std::cout << key->id << "(" << children.at(key) << ") ";
+    }
+    std::cout << "}\n";
+}

@@ -118,8 +118,6 @@ bool Graph::remove_node(const std::string& id) {
         const auto& children = node->get_children();
         if (children.find(node_to_remove) != children.end()) {
             node->remove_edge(node_to_remove);
-            node->decrement_children();
-            node_to_remove->decrement_parents();
         }
     }
 
@@ -183,4 +181,17 @@ bool operator==(const Graph& lhs, const Graph& rhs) {
     }
 
     return true;
+}
+
+std::ostream& operator<<(std::ostream& os, const Graph& graph) {
+    std::vector<Node*> node_list;
+    for (const auto& [_, node] : graph.nodes) {
+        node_list.push_back(node);
+    }
+    std::sort(node_list.begin(), node_list.end(),
+              [](const Node* a, const Node* b) { return a->get_id() < b->get_id(); });
+    for (const auto node : node_list) {
+        os << node << "\n";
+    }
+    return os;
 }
