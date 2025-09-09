@@ -83,21 +83,21 @@ public:
      * @return The node's ID as a string.
      */
     [[nodiscard]]
-    inline std::string get_id() const;
+    std::string get_id() const;
 
     /**
      * @brief Retrieves the number of parent nodes (incoming edges).
      * @return The number of parent nodes.
      */
     [[nodiscard]]
-    inline int get_num_parents() const;
+    int get_num_parents() const;
 
     /**
      * @brief Retrieves the number of child nodes (outgoing edges).
      * @return The number of child nodes.
      */
     [[nodiscard]]
-    inline int get_num_children() const;
+    int get_num_children() const;
 
     /**
      * @brief Adds a directed edge to a neighbor node with a specified weight.
@@ -105,14 +105,14 @@ public:
      * @param weight Weight of the edge.
      * @return True if the edge was added successfully, false if it already exists.
      */
-    inline bool add_edge(Node* neighbor, int weight);
+    bool add_edge(Node* neighbor, int weight);
 
     /**
      * @brief Removes the directed edge to a neighbor node.
      * @param neighbor Pointer to the neighbor node.
      * @return True if the edge was removed successfully, false if it does not exist.
      */
-    inline bool remove_edge(Node* neighbor);
+    bool remove_edge(Node* neighbor);
 
     /**
      * @brief Changes the weight of the edge to a neighbor node.
@@ -120,7 +120,7 @@ public:
      * @param new_weight New weight for the edge.
      * @return True if the weight was changed successfully, false if the edge does not exist.
      */
-    inline bool change_edge_weight(Node* neighbor, int new_weight);
+    bool change_edge_weight(Node* neighbor, int new_weight);
 
     /**
      * @brief Checks if there is a directed edge to a neighbor node.
@@ -128,21 +128,21 @@ public:
      * @return True if the edge exists, false otherwise.
      */
     [[nodiscard]]
-    inline bool contains_edge(Node* neighbor) const;
+    bool contains_edge(Node* neighbor) const;
 
     /**
      * @brief Checks if the node is a source (no incoming edges).
      * @return True if the node is a source, false otherwise.
      */
     [[nodiscard]]
-    inline bool is_source() const;
+    bool is_source() const;
 
     /**
      * @brief Checks if the node is a sink (no outgoing edges).
      * @return True if the node is a sink, false otherwise.
      */
     [[nodiscard]]
-    inline bool is_sink() const;
+    bool is_sink() const;
 
     /**
      * @brief Equality operator to compare two nodes based on their ID, parent count, child count,

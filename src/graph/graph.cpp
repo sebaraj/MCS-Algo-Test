@@ -1,5 +1,6 @@
 #include <mcs/graph.h>
 
+#include <cstddef>
 #include <iostream>
 
 Graph::Graph() = default;
@@ -77,7 +78,7 @@ bool Graph::is_dag() {
         }
     }
 
-    return visited_count == nodes.size();
+    return static_cast<size_t>(visited_count) == nodes.size();
 }
 
 void Graph::print_graph() const {
@@ -103,14 +104,6 @@ bool Graph::add_node(const std::string& id) {
     nodes[id] = new Node(id);
     return true;
 }
-
-// void Graph::remove_from_list(const std::string& id) {
-//     auto it = nodes.find(id);
-//     if (it != nodes.end()) {
-//         delete it->second;
-//         nodes.erase(it);
-//     }
-// }
 
 bool Graph::remove_node(const std::string& id) {
     auto it = nodes.find(id);

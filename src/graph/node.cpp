@@ -42,13 +42,13 @@ Node& Node::operator=(Node&& other) noexcept {
 
 Node::~Node() { children.clear(); }
 
-inline std::string Node::get_id() const { return id; }
+std::string Node::get_id() const { return id; }
 
-inline int Node::get_num_parents() const { return num_parents; }
+int Node::get_num_parents() const { return num_parents; }
 
-inline int Node::get_num_children() const { return num_children; }
+int Node::get_num_children() const { return num_children; }
 
-inline bool Node::add_edge(Node* neighbor, int weight) {
+bool Node::add_edge(Node* neighbor, int weight) {
     if (children.find(neighbor) != children.end()) {
         return false;
     }
@@ -58,7 +58,7 @@ inline bool Node::add_edge(Node* neighbor, int weight) {
     return true;
 }
 
-inline bool Node::remove_edge(Node* neighbor) {
+bool Node::remove_edge(Node* neighbor) {
     if (children.find(neighbor) == children.end()) {
         return false;
     }
@@ -68,7 +68,7 @@ inline bool Node::remove_edge(Node* neighbor) {
     return true;
 }
 
-inline bool Node::change_edge_weight(Node* neighbor, int new_weight) {
+bool Node::change_edge_weight(Node* neighbor, int new_weight) {
     if (children.find(neighbor) == children.end()) {
         return false;
     }
@@ -76,13 +76,11 @@ inline bool Node::change_edge_weight(Node* neighbor, int new_weight) {
     return true;
 }
 
-inline bool Node::contains_edge(Node* neighbor) const {
-    return children.find(neighbor) != children.end();
-}
+bool Node::contains_edge(Node* neighbor) const { return children.find(neighbor) != children.end(); }
 
-inline bool Node::is_source() const { return num_parents == 0; }
+bool Node::is_source() const { return num_parents == 0; }
 
-inline bool Node::is_sink() const { return num_children == 0; }
+bool Node::is_sink() const { return num_children == 0; }
 
 bool operator==(const Node& lhs, const Node& rhs) {
     bool same = lhs.get_num_parents() == rhs.get_num_parents() && lhs.get_id() == rhs.get_id()

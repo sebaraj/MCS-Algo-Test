@@ -13,19 +13,53 @@
 #include "../src/algorithms/mcis_finder.h"
 #include "graph.h"
 
-enum class AlgorithmType { BRON_KERBOSCH_SERIAL, FILLER };
+/**
+ * @enum AlgorithmType
+ * @brief Enumeration of available MCIS algorithms.
+ */
+enum class AlgorithmType { BRON_KERBOSCH_SERIAL };
 
+/**
+ * @class MCISAlgorithm
+ * @brief Manages and runs different MCIS algorithms on pairs of graphs.
+ * This class allows users to select and execute various algorithms to find the Maximum Common
+ * Induced Subgraph (MCIS) between two graphs.
+ */
 class MCISAlgorithm {
 private:
+    /**
+     * @brief List of available MCIS algorithms.
+     */
     std::vector<MCISFinder*> algorithms;
 
 public:
+    /**
+     * @brief Constructs the MCISAlgorithm manager and initializes available algorithms.
+     */
     MCISAlgorithm();
 
+    /**
+     * @brief Destructor to clean up allocated algorithms.
+     */
     ~MCISAlgorithm();
 
+    /**
+     * @brief Runs the specified MCIS algorithm on two input graphs.
+     * @param g1 The first input graph.
+     * @param g2 The second input graph.
+     * @param type The type of algorithm to run (from AlgorithmType enum).
+     * @return A vector of pointers to Graph objects representing the found MCIS results.
+     */
     std::vector<Graph*> run(const Graph& g1, const Graph& g2, AlgorithmType type);
 
+    /**
+     * @brief Runs multiple specified MCIS algorithms on two input graphs.
+     * @param g1 The first input graph.
+     * @param g2 The second input graph.
+     * @param types A vector of algorithm types to run (from AlgorithmType enum).
+     * @return A vector of vectors, where each inner vector contains pointers to Graph objects
+     * representing the found MCIS results for each algorithm.
+     */
     std::vector<std::vector<Graph*>> run_many(const Graph& g1, const Graph& g2,
                                               std::vector<AlgorithmType> types);
 };

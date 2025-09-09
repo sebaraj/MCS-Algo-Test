@@ -138,6 +138,10 @@ public:
     [[nodiscard]]
     inline int get_num_nodes() const;
 
+    /**
+     * @brief Retrieves the map of nodes in the graph.
+     * @return Constant reference to the unordered map of node IDs to Node pointers.
+     */
     [[nodiscard]]
     const std::unordered_map<std::string, Node*>& get_nodes() const;
 

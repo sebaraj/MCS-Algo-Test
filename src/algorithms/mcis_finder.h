@@ -12,6 +12,12 @@
 
 #include "mcs/graph.h"
 
+/**
+ * @class MCISFinder
+ *
+ * Abstract base class for finding the Maximum Common Induced Subgraph (MCIS) between two graphs.
+ * Derived classes must implement the find method.
+ */
 class MCISFinder {
 public:
     virtual std::vector<Graph*> find(const Graph& g1, const Graph& g2) = 0;
