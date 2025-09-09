@@ -11,8 +11,9 @@
 #include <vector>
 
 #include "graph.h"
+#include "src/algorithms/mcis_finder.h"
 
-enum class AlgorithmType { BRANCH_AND_BOUND, HEURISTIC, DYNAMIC_PROGRAMMING };
+enum class AlgorithmType { BRON_KERBOSCH_SERIAL, FILLER };
 
 class MCISAlgorithm {
 private:
@@ -23,10 +24,10 @@ public:
 
     ~MCISAlgorithm();
 
-    std::vector<std::vector<Graph&>> run(const Graph& g1, const Graph& g2,
-                                         std::vector<AlgorithmType> types);
+    std::vector<Graph*> run(const Graph& g1, const Graph& g2, AlgorithmType type);
 
-    std::vector<std::vector<Graph*>> run_all(const Graph& g1, const Graph& g2);
+    std::vector<std::vector<Graph*>> run_many(const Graph& g1, const Graph& g2,
+                                              std::vector<AlgorithmType> types);
 };
 
 #endif  // MCIS_ALGORITHM_H
