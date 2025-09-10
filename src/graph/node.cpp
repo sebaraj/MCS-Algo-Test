@@ -52,7 +52,7 @@ int Node::get_num_children() const { return num_children; }
 
 bool Node::add_edge(Node* neighbor, int weight) {
     if (children.find(neighbor) != children.end()) {
-        return false;
+        return (children[neighbor] == weight) ? true : false;
     }
     children[neighbor] = weight;
     num_children++;
@@ -108,8 +108,9 @@ std::ostream& operator<<(std::ostream& os, const Node& node) {
     os << "Number of Children: " << node.num_children << "\n";
     os << "Children:\n";
     std::vector<Node*> keys(node.children.size());
+    int idx = 0;
     for (const auto& [key, _] : node.children) {
-        keys.push_back(key);
+        keys[idx++] = key;
     }
     sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
     for (const auto key : keys) {
@@ -121,8 +122,9 @@ std::ostream& operator<<(std::ostream& os, const Node& node) {
 void Node::print_children() const {
     std::cout << id << " -> { ";
     std::vector<Node*> keys(children.size());
+    int idx = 0;
     for (const auto& [key, _] : children) {
-        keys.push_back(key);
+        keys[idx++] = key;
     }
     sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
     for (const auto key : keys) {
