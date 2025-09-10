@@ -8,6 +8,7 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -167,14 +168,18 @@ public:
     const std::unordered_map<Node*, int>& get_children() const;
 
     /**
-     * @brief Decrements the number of parent nodes by one.
+     * @brief operator to print node (SLOW)
+     * @param os output stream
+     * @param node node to print
+     * @return output stream
      */
-    void decrement_parents();
+    friend std::ostream& operator<<(std::ostream& os, const Node& node);
 
     /**
-     * @brief Decrements the number of child nodes by one.
+     * @brief prints node with it's children and weights
+     * @return void, prints to std::cout
      */
-    void decrement_children();
+    void print_children() const;
 };
 
 #endif  // NODE_H

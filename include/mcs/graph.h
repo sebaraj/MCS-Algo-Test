@@ -150,6 +150,20 @@ public:
      * @return True if the graphs are equal, false otherwise.
      */
     bool operator==(const Graph& other) const;
+
+    /**
+     * @brief Stream insertion operator to print the graph.
+     * @param os Output stream.
+     * @param graph Graph to print.
+     * @return Reference to the output stream.
+     */
+    friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
+
+    /**
+     * @brief Generates a DOT file representing the graph for visualization.
+     * @param filename Name of the output graph name
+     */
+    void generate_diagram_file(const std::string& graph_name) const;
 };
 
 #endif  // GRAPH_H
