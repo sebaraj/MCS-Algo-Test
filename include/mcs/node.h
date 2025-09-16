@@ -43,10 +43,8 @@ public:
     /**
      * @brief Constructs a Node with a given ID and optional parent/child counts.
      * @param id Unique identifier for the node.
-     * @param num_parents Initial number of parent nodes (default is 0).
-     * @param num_children Initial number of child nodes (default is 0).
      */
-    Node(std::string id, int num_parents = 0, int num_children = 0);
+    Node(const std::string& id);
 
     /**
      * @brief Copy constructor.
@@ -168,7 +166,7 @@ public:
     const std::unordered_map<Node*, int>& get_children() const;
 
     /**
-     * @brief operator to print node (SLOW)
+     * @brief operator to print node and its children
      * @param os output stream
      * @param node node to print
      * @return output stream
@@ -176,10 +174,11 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Node& node);
 
     /**
-     * @brief prints node with it's children and weights
+     * @brief prints node with all elements (id, number of parents, number of children, and children
+     * ids with weights)
      * @return void, prints to std::cout
      */
-    void print_children() const;
+    void print_full() const;
 };
 
 #endif  // NODE_H

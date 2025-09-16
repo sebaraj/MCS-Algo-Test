@@ -89,6 +89,14 @@ public:
     bool add_node(const std::string& id);
 
     /**
+     * @brief Adds multiple nodes with the given IDs to the graph.
+     * @param ids Vector of unique identifiers for the new nodes.
+     * @return True if all nodes were added successfully, false if any node with the same ID already
+     * exists.
+     */
+    bool add_node_set(const std::vector<std::string>& ids);
+
+    /**
      * @brief Removes the node with the given ID from the graph.
      * @param id Unique identifier of the node to remove.
      * @return True if the node was removed successfully, false if the node does not exist.
@@ -104,6 +112,17 @@ public:
      * edge already exists.
      */
     bool add_edge(const std::string& from_id, const std::string& to_id, int weight);
+
+    /**
+     * @brief Adds directed edges from one node to multiple other nodes with a specified weight.
+     * @param from_id ID of the source node.
+     * @param to_ids Vector of IDs of the children nodes.
+     * @param weights Vector of weights of the edges, defaults to 0 if vector is empty.
+     * @return True if all edges were added successfully, false if the source node does not exist or
+     * any edge already exists.
+     */
+    bool add_edge_set(const std::string& from_id, const std::vector<std::string>& to_ids,
+                      const std::vector<int>& weights = {});
 
     /**
      * @brief Removes the directed edge from one node to another.

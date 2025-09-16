@@ -109,6 +109,16 @@ bool Graph::add_node(const std::string& id) {
     return true;
 }
 
+bool Graph::add_node_set(const std::vector<std::string>& ids) {
+    bool all_added = true;
+    for (const std::string& id : ids) {
+        if (!add_node(id)) {
+            all_added = false;
+        }
+    }
+    return all_added;
+}
+
 bool Graph::remove_node(const std::string& id) {
     auto it = nodes.find(id);
     if (it == nodes.end()) {
@@ -137,6 +147,24 @@ bool Graph::add_edge(const std::string& from_id, const std::string& to_id, int w
         return false;
     }
     return from_it->second->add_edge(to_it->second, weight);
+}
+
+bool Graph::add_edge_set(const std::string& from_id, const std::vector<std::string>& to_ids,
+                         const std::vector<int>& weights) {
+    bool use_zero_weights = weights.empty() || weights.size() != to_ids.size();
+    auto from_it = nodes.find(from_id);
+    if (from_it == nodes.end()) {
+        return false;
+    }
+    bool all_added = true;
+    for (size_t i = 0; i < to_ids.size(); ++i) {
+        int weight = use_zero_weights ? 0 : weights[i];
+        auto to_it = nodes.find(to_ids[i]);
+        if (to_it == nodes.end() || !from_it->second->add_edge(to_it->second, weight)) {
+            all_added = false;
+        }
+    }
+    return all_added;
 }
 
 bool Graph::remove_edge(const std::string& from_id, const std::string& to_id) {
@@ -188,9 +216,10 @@ bool operator==(const Graph& lhs, const Graph& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Graph& graph) {
-    std::vector<Node*> node_list;
+    std::vector<Node*> node_list(graph.nodes.size());
+    int idx = 0;
     for (const auto& [_, node] : graph.nodes) {
-        node_list.push_back(node);
+        node_list[idx++] = node;
     }
     std::sort(node_list.begin(), node_list.end(),
               [](const Node* a, const Node* b) { return a->get_id() < b->get_id(); });
