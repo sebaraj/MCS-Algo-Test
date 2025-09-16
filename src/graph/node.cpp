@@ -2,8 +2,7 @@
 
 #include <iomanip>
 
-Node::Node(std::string id, int num_parents, int num_children)
-    : id(std::move(id)), num_parents(num_parents), num_children(num_children) {};
+Node::Node(const std::string& id) : id(std::move(id)), num_parents(0), num_children(0) {};
 
 Node::Node(const Node& other)
     : id(other.id),
@@ -54,6 +53,9 @@ bool Node::add_edge(Node* neighbor, int weight) {
     if (children.find(neighbor) != children.end()) {
         return (children[neighbor] == weight) ? true : false;
     }
+    if (id == neighbor->id) {
+        return false;
+    }
     children[neighbor] = weight;
     num_children++;
     neighbor->num_parents++;
@@ -103,32 +105,32 @@ bool Node::same_id(const Node& other) const { return id == other.id; }
 const std::unordered_map<Node*, int>& Node::get_children() const { return children; }
 
 std::ostream& operator<<(std::ostream& os, const Node& node) {
-    os << "Node ID: " << node.id << "\n";
-    os << "Number of Parents: " << node.num_parents << "\n";
-    os << "Number of Children: " << node.num_children << "\n";
-    os << "Children:\n";
+    os << node.id << " -> { ";
     std::vector<Node*> keys(node.children.size());
     int idx = 0;
     for (const auto& [key, _] : node.children) {
         keys[idx++] = key;
     }
-    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
+    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
     for (const auto key : keys) {
-        os << "  Child ID: " << key->get_id() << ", Weight: " << node.children.at(key) << "\n";
+        os << std::quoted(key->id) << "(" << node.children.at(key) << ") ";
     }
+    os << "}\n";
     return os;
 }
 
-void Node::print_children() const {
-    std::cout << id << " -> { ";
+void Node::print_full() const {
+    std::cout << "Node ID: " << id << "\n";
+    std::cout << "Number of Parents: " << num_parents << "\n";
+    std::cout << "Number of Children: " << num_children << "\n";
+    std::cout << "Children:\n";
     std::vector<Node*> keys(children.size());
     int idx = 0;
     for (const auto& [key, _] : children) {
         keys[idx++] = key;
     }
-    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
+    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
     for (const auto key : keys) {
-        std::cout << std::quoted(key->id) << "(" << children.at(key) << ") ";
+        std::cout << "  Child ID: " << key->get_id() << ", Weight: " << children.at(key) << "\n";
     }
-    std::cout << "}\n";
 }
