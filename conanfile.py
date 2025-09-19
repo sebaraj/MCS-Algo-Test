@@ -1,8 +1,8 @@
 from conan import ConanFile
 
 
-class MCSConan(ConanFile):
-    name = "MCS-Algo_Test"
+class MCISConan(ConanFile):
+    name = "MCIS-Algo_Test"
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     requires = [

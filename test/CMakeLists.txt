@@ -4,7 +4,7 @@ add_executable(tests "${TEST_FILES}")
 
 target_link_libraries(tests
   PRIVATE
-    mcs
+    mcis
     ${CONAN_LIBS}
     ${GTest_LIBRARIES}
     GTest::gtest

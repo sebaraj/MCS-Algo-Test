@@ -5,7 +5,7 @@
  * @section DESCRIPTION
  */
 
-#include "mcs/mcis_algorithm.h"
+#include "mcis/mcis_algorithm.h"
 
 #include <iostream>
 

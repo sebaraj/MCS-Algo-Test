@@ -1,6 +1,6 @@
-# Maximum Common Induced Subgraph (MCIS) Algorithm Testing Framework
-
 <div align="center">
+
+# Maximum Common Induced Subgraph (MCIS) Algorithm Testing Framework
 
 _A Senior Thesis Project in Electrical Engineering and Computer Science_\
 _Yale University • CPSC 4900_
@@ -61,17 +61,17 @@ Ensure you have the following dependencies installed:
 - **C++ Compiler**: Supporting C++20 standard
   - GCC 10+ / Clang 12+ / MSVC 2019+
 - **CMake**: Version 3.22.1 or higher
-- **(optional) Graphviz (dot)**: For graph visualization
+- **Graphviz (dot)**: For graph visualization (optional)
 
 ```bash
-  # macOS
-  brew install cmake graphviz
+# macOS
+brew install cmake graphviz
 
-  # Ubuntu/Debian
-  sudo apt install cmake graphviz
+# Ubuntu/Debian
+sudo apt install cmake graphviz
 
-  # Windows (using Chocolatey)
-  choco install cmake graphviz
+# Windows (using Chocolatey)
+choco install cmake graphviz
 ```
 
 ### Building the Project
@@ -97,5 +97,87 @@ cmake --build .
 # Run tests
 ctest --verbose
 ```
+
+---
+
+## Usage
+
+### Basic Graph Operations
+
+```cpp
+#include "mcis/graph.h"
+```
+
+### Running MCIS Algorithms
+
+```cpp
+#include "mcis/graph.h"
+#include "mcis/mcis_algorithms.h"
+
+```
+
+---
+
+## MCIS Algorithms
+
+### Current Implementations
+
+(proposed, still need to implement)
+
+- **Brute Force Solver**: Exact MCIS using maximum clique reduction
+
+### Planned Implementations
+
+---
+
+## Workload CDAG Generators
+
+(proposed, still need to implement)\
+The framework includes generators for BCI-relevant computational graphs, such as
+
+- **Discrete Wavelet Transform (DWT)**: Multi-resolution signal analysis
+- **Fast Fourier Transform (FFT)**: Frequency domain analysis
+- **Matrix-Vector Multiplication (MVM)**: Linear algebraic operations
+
+---
+
+## Testing
+
+```bash
+# Tests are build alongside the main project
+cd build
+cmake --build .
+
+# Run all tests
+ctest --verbose --parallel 4
+
+# Specific test categories
+ctest -R NodeTest
+ctest -R GraphTest
+ctest -R AlgorithmTest
+ctest -R BenchmarkTest
+```
+
+---
+
+## Performance Analysis
+
+(proposed, still need to implement)\
+Generate comprehensive performance reports with various metrics:
+
+```bash
+# Runtime analysis
+./build/bin/benchmark --metric runtime --graphs mvm5x5,mvm20x10 --algorithms all
+
+# Memory usage profiling
+./build/bin/benchmark --metric memory --profile detailed
+```
+
+---
+
+## Contributing
+
+This is a senior thesis project, but suggestions and discussions are welcome. Please feel free to contact me at bryan.sebaraj@yale.edu,
+or open up an issue or feature request on GitHub.
 
 ---

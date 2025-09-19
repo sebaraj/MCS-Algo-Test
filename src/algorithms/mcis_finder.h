@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "mcs/graph.h"
+#include "mcis/graph.h"
 
 /**
  * @class MCISFinder
