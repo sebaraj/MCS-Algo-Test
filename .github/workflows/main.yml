@@ -1,0 +1,23 @@
+---
+name: Build and Test MCIS-BCI Library
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: bryanwsebaraj/mcsi-bci:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build & Test
+        run: |
+          mkdir build
+          cd build
+          conan profile detect
+          conan install .. --build=missing -of . -v -g CMakeToolchain -g CMakeDeps
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
+          cmake --build .
+          ninja test
