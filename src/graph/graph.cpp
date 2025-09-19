@@ -383,7 +383,7 @@ Graph Graph::create_mvm_graph_from_dimensions(int m, int n) {
     std::vector<std::string> vec(n);
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
-            mat[i][j] = "m" + std::to_string(i) + std::to_string(j);
+            mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
         }
     }
     for (int j = 0; j < n; ++j) {
