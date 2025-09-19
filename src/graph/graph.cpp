@@ -55,12 +55,11 @@ Graph::~Graph() {
 }
 
 bool Graph::is_dag() {
-    // Use cached result if valid
     if (dag_cache_valid) {
         return dag_cache_result;
     }
 
-    // Optimized DAG detection using Kahn's algorithm with early termination
+    // Kahn's algorithm for cycle detection
     std::unordered_map<std::string, int> in_degree;
     in_degree.reserve(nodes.size());
 
@@ -69,7 +68,7 @@ bool Graph::is_dag() {
     }
 
     std::vector<std::string> zero_in_degree;
-    zero_in_degree.reserve(nodes.size() / 4);  // Heuristic: expect ~25% sources
+    zero_in_degree.reserve(nodes.size() / 4);
 
     for (const auto& pair : in_degree) {
         if (pair.second == 0) {
@@ -85,7 +84,7 @@ bool Graph::is_dag() {
         zero_in_degree.pop_back();
         visited_count++;
 
-        // Early termination: if we've visited all nodes, it's definitely a DAG
+        // early termination
         if (visited_count == total_nodes) {
             dag_cache_result = true;
             dag_cache_valid = true;
@@ -159,17 +158,14 @@ bool Graph::remove_node(const std::string& id) {
 
     Node* node_to_remove = it->second;
 
-    // Remove edges FROM the node being removed to other nodes
-    // We need to create a copy of children to avoid modifying while iterating
     auto children_copy = node_to_remove->get_children();
     for (const auto& [child, weight] : children_copy) {
         node_to_remove->remove_edge(child);  // This properly updates parent counts
     }
 
-    // Remove edges TO the node being removed from other nodes
     for (auto& pair : nodes) {
         Node* node = pair.second;
-        if (node != node_to_remove) {  // Skip the node being removed
+        if (node != node_to_remove) {
             const auto& children = node->get_children();
             if (children.find(node_to_remove) != children.end()) {
                 node->remove_edge(node_to_remove);
@@ -207,7 +203,6 @@ bool Graph::add_edge_set(const std::string& from_id, const std::vector<std::stri
     bool all_added = true;
     bool any_added = false;
 
-    // Batch process for better performance
     for (size_t i = 0; i < to_ids.size(); ++i) {
         int weight = use_zero_weights ? 0 : weights[i];
         auto to_it = nodes.find(to_ids[i]);
@@ -245,7 +240,6 @@ bool Graph::change_edge_weight(const std::string& from_id, const std::string& to
         return false;
     }
     bool result = from_it->second->change_edge_weight(to_it->second, new_weight);
-    // Note: Changing edge weight doesn't affect DAG property, so no cache invalidation needed
     return result;
 }
 
@@ -312,8 +306,6 @@ void Graph::generate_diagram_file(const std::string& graph_name) const {
     system(("dot -Tpng " + filename + " -o diagrams/" + filename + ".png").c_str());
 }
 
-// Performance-optimized methods
-
 int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
     if (node_ids.empty()) {
         return 0;
@@ -322,7 +314,6 @@ int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
     std::vector<Node*> nodes_to_remove;
     nodes_to_remove.reserve(node_ids.size());
 
-    // First pass: collect nodes to remove and validate they exist
     for (const std::string& id : node_ids) {
         auto it = nodes.find(id);
         if (it != nodes.end()) {
@@ -330,22 +321,17 @@ int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
         }
     }
 
-    if (nodes_to_remove.empty()) {
-        return 0;
-    }
+    if (nodes_to_remove.empty()) return 0;
 
-    // Second pass: clean up all edges involving nodes to be removed
     std::unordered_set<Node*> removal_set(nodes_to_remove.begin(), nodes_to_remove.end());
 
     for (Node* node_to_remove : nodes_to_remove) {
-        // Remove outgoing edges from this node
         auto children_copy = node_to_remove->get_children();
         for (const auto& [child, weight] : children_copy) {
             node_to_remove->remove_edge(child);
         }
     }
 
-    // Third pass: remove incoming edges to nodes being removed
     for (auto& [id, node] : nodes) {
         if (removal_set.find(node) == removal_set.end()) {  // Not being removed
             std::vector<Node*> edges_to_remove;
@@ -360,7 +346,6 @@ int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
         }
     }
 
-    // Fourth pass: delete nodes and remove from map
     for (Node* node_to_remove : nodes_to_remove) {
         nodes.erase(node_to_remove->get_id());
         delete node_to_remove;
@@ -370,6 +355,9 @@ int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
     return static_cast<int>(nodes_to_remove.size());
 }
 
-void Graph::reserve_nodes(size_t expected_size) {
-    nodes.reserve(expected_size);
+void Graph::reserve_nodes(size_t expected_size) { nodes.reserve(expected_size); }
+
+void Graph::invalidate_caches() const {
+    dag_cache_valid = false;
+    ++version;
 }

@@ -36,11 +36,7 @@ private:
     /**
      * @brief Invalidates all caches when the graph is modified.
      */
-    void invalidate_caches() const {
-        dag_cache_valid = false;
-        ++version;
-    }
-
+    void invalidate_caches() const;
 
 public:
     /**
@@ -222,7 +218,9 @@ public:
      * @return Current version number.
      */
     [[nodiscard]]
-    int get_version() const { return version; }
+    int get_version() const {
+        return version;
+    }
 };
 
 #endif  // GRAPH_H
