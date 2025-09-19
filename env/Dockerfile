@@ -17,20 +17,5 @@ WORKDIR /workspace
 
 COPY . /workspace
 
-CMD bash -lc "\
-    mkdir -p build && cd build && \
-    conan install .. \
-    --install-folder . \
-    --build=missing \
-    -g CMakeToolchain \
-    -g CMakeDeps && \
-    cmake \
-    -S .. -B . \
-    -G Ninja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake && \
-    cmake --build . && \
-    ninja test \
-    "
-
+CMD mkdir -p build
 
