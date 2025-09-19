@@ -1,4 +1,3 @@
----
 name: Build and Test MCIS-BCI Library
 on:
   push:
@@ -23,6 +22,6 @@ jobs:
           cd build
           conan profile detect
           conan install .. --build=missing -of . -v -g CMakeToolchain -g CMakeDeps
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake 
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
           cmake --build .
           ninja test
