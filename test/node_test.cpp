@@ -1,5 +1,6 @@
 #include "mcs/node.h"
 
+#include <limits>
 #include <memory>
 #include <sstream>
 
@@ -301,4 +302,117 @@ TEST_F(NodeTest, ComplexGraphScenarios) {
     }
     EXPECT_EQ(start_node->get_num_children(), 0);
     EXPECT_TRUE(start_node->is_sink());
+}
+
+// Test 16: Memory management and dangling pointer safety
+TEST_F(NodeTest, MemoryManagementAndDanglingPointers) {
+    Node* temp_node = new Node("TempNode");
+    node_a->add_edge(temp_node, 42);
+
+    EXPECT_TRUE(node_a->contains_edge(temp_node));
+    EXPECT_EQ(node_a->get_num_children(), 1);
+    EXPECT_EQ(temp_node->get_num_parents(), 1);
+
+    // Verify edge weight is correct
+    const auto& children = node_a->get_children();
+    EXPECT_EQ(children.at(temp_node), 42);
+
+    // Remove edge before deleting the node to maintain graph integrity
+    EXPECT_TRUE(node_a->remove_edge(temp_node));
+    EXPECT_EQ(node_a->get_num_children(), 0);
+    EXPECT_EQ(temp_node->get_num_parents(), 0);
+
+    delete temp_node;
+
+    // Verify node_a is now a sink after edge removal
+    EXPECT_TRUE(node_a->is_sink());
+    EXPECT_TRUE(node_a->get_children().empty());
+}
+
+// Test 17: Edge weight extremes and boundary conditions
+TEST_F(NodeTest, EdgeWeightExtremesAndBoundaryConditions) {
+    // Test with maximum and minimum integer values
+    const int max_weight = std::numeric_limits<int>::max();
+    const int min_weight = std::numeric_limits<int>::min();
+    const int zero_weight = 0;
+
+    // Add edges with extreme weights
+    EXPECT_TRUE(node_a->add_edge(node_b.get(), max_weight));
+    EXPECT_TRUE(node_a->add_edge(node_c.get(), min_weight));
+    EXPECT_TRUE(node_a->add_edge(node_d.get(), zero_weight));
+
+    // Verify weights are stored correctly
+    const auto& children = node_a->get_children();
+    EXPECT_EQ(children.at(node_b.get()), max_weight);
+    EXPECT_EQ(children.at(node_c.get()), min_weight);
+    EXPECT_EQ(children.at(node_d.get()), zero_weight);
+
+    // Test changing to extreme values
+    EXPECT_TRUE(node_a->change_edge_weight(node_b.get(), min_weight));
+    EXPECT_TRUE(node_a->change_edge_weight(node_c.get(), max_weight));
+    EXPECT_TRUE(node_a->change_edge_weight(node_d.get(), -1));
+
+    // Verify changes
+    EXPECT_EQ(children.at(node_b.get()), min_weight);
+    EXPECT_EQ(children.at(node_c.get()), max_weight);
+    EXPECT_EQ(children.at(node_d.get()), -1);
+
+    // Test parent/child counts remain consistent
+    EXPECT_EQ(node_a->get_num_children(), 3);
+    EXPECT_EQ(node_b->get_num_parents(), 1);
+    EXPECT_EQ(node_c->get_num_parents(), 1);
+    EXPECT_EQ(node_d->get_num_parents(), 1);
+}
+
+// Test 18: Comprehensive equality and comparison edge cases
+TEST_F(NodeTest, ComprehensiveEqualityAndComparisonEdgeCases) {
+    // Create identical nodes with complex edge structures
+    Node node1("Complex");
+    Node node2("Complex");
+    Node helper1("Helper1");
+    Node helper2("Helper2");
+    Node helper3("Helper3");
+
+    // Build identical structures
+    node1.add_edge(&helper1, 10);
+    node1.add_edge(&helper2, -5);
+    node1.add_edge(&helper3, 0);
+
+    node2.add_edge(&helper1, 10);
+    node2.add_edge(&helper2, -5);
+    node2.add_edge(&helper3, 0);
+
+    // Manually set parent counts to match (simulating real graph scenario)
+    // This tests the equality operator's comprehensiveness
+    EXPECT_TRUE(node1 == node2);
+
+    // Test inequality with different edge weights
+    EXPECT_TRUE(node1.change_edge_weight(&helper1, 15));
+    EXPECT_FALSE(node1 == node2);
+
+    // Restore and test inequality with different edge targets
+    EXPECT_TRUE(node1.change_edge_weight(&helper1, 10));
+    EXPECT_TRUE(node1 == node2); // Should be equal again
+
+    // Add edge to only one node
+    Node helper4("Helper4");
+    node1.add_edge(&helper4, 100);
+    EXPECT_FALSE(node1 == node2);
+
+    // Test same_id method with complex scenarios
+    Node different_id("Different");
+    different_id.add_edge(&helper1, 10);
+    different_id.add_edge(&helper2, -5);
+    different_id.add_edge(&helper3, 0);
+
+    EXPECT_TRUE(node1.same_id(node2));
+    EXPECT_FALSE(node1.same_id(different_id));
+
+    // Test with empty vs non-empty nodes of same ID
+    Node empty1("Empty");
+    Node empty2("Empty");
+    helper1.add_edge(&empty1, 1);
+
+    EXPECT_TRUE(empty1.same_id(empty2));
+    EXPECT_FALSE(empty1 == empty2); // Different parent counts
 }

@@ -127,11 +127,21 @@ bool Graph::remove_node(const std::string& id) {
 
     Node* node_to_remove = it->second;
 
+    // Remove edges FROM the node being removed to other nodes
+    // We need to create a copy of children to avoid modifying while iterating
+    auto children_copy = node_to_remove->get_children();
+    for (const auto& [child, weight] : children_copy) {
+        node_to_remove->remove_edge(child);  // This properly updates parent counts
+    }
+
+    // Remove edges TO the node being removed from other nodes
     for (auto& pair : nodes) {
         Node* node = pair.second;
-        const auto& children = node->get_children();
-        if (children.find(node_to_remove) != children.end()) {
-            node->remove_edge(node_to_remove);
+        if (node != node_to_remove) {  // Skip the node being removed
+            const auto& children = node->get_children();
+            if (children.find(node_to_remove) != children.end()) {
+                node->remove_edge(node_to_remove);
+            }
         }
     }
 
@@ -194,20 +204,20 @@ Node* Graph::get_node(const std::string& id) const {
     return nullptr;
 }
 
-inline int Graph::get_num_nodes() const { return nodes.size(); }
+int Graph::get_num_nodes() const { return static_cast<int>(nodes.size()); }
 
 const std::unordered_map<std::string, Node*>& Graph::get_nodes() const { return nodes; }
 
-bool operator==(const Graph& lhs, const Graph& rhs) {
-    if (lhs.get_num_nodes() != rhs.get_num_nodes()) {
+bool Graph::operator==(const Graph& other) const {
+    if (get_num_nodes() != other.get_num_nodes()) {
         return false;
     }
 
-    for (const auto& pair : lhs.get_nodes()) {
+    for (const auto& pair : nodes) {
         const std::string& node_id = pair.first;
-        Node* lhs_node = pair.second;
-        Node* rhs_node = rhs.get_node(node_id);
-        if (!rhs_node || *lhs_node != *rhs_node) {
+        Node* this_node = pair.second;
+        Node* other_node = other.get_node(node_id);
+        if (!other_node || *this_node != *other_node) {
             return false;
         }
     }
@@ -216,15 +226,16 @@ bool operator==(const Graph& lhs, const Graph& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Graph& graph) {
-    std::vector<Node*> node_list(graph.nodes.size());
+    const auto& nodes_map = graph.get_nodes();
+    std::vector<Node*> node_list(nodes_map.size());
     int idx = 0;
-    for (const auto& [_, node] : graph.nodes) {
+    for (const auto& [_, node] : nodes_map) {
         node_list[idx++] = node;
     }
     std::sort(node_list.begin(), node_list.end(),
               [](const Node* a, const Node* b) { return a->get_id() < b->get_id(); });
     for (const auto node : node_list) {
-        os << node << "\n";
+        os << *node << "\n";
     }
     return os;
 }

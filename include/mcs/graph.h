@@ -155,7 +155,7 @@ public:
      * @return The number of nodes.
      */
     [[nodiscard]]
-    inline int get_num_nodes() const;
+    int get_num_nodes() const;
 
     /**
      * @brief Retrieves the map of nodes in the graph.
