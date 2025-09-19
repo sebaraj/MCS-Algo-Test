@@ -3,7 +3,9 @@
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <unordered_set>
 
 #include "time.h"
 
@@ -54,12 +56,21 @@ Graph::~Graph() {
 }
 
 bool Graph::is_dag() {
+    if (dag_cache_valid) {
+        return dag_cache_result;
+    }
+
+    // Kahn's algorithm for cycle detection
     std::unordered_map<std::string, int> in_degree;
+    in_degree.reserve(nodes.size());
+
     for (const auto& pair : nodes) {
         in_degree[pair.first] = pair.second->get_num_parents();
     }
 
     std::vector<std::string> zero_in_degree;
+    zero_in_degree.reserve(nodes.size() / 4);
+
     for (const auto& pair : in_degree) {
         if (pair.second == 0) {
             zero_in_degree.push_back(pair.first);
@@ -67,10 +78,19 @@ bool Graph::is_dag() {
     }
 
     int visited_count = 0;
+    const int total_nodes = static_cast<int>(nodes.size());
+
     while (!zero_in_degree.empty()) {
         std::string node_id = zero_in_degree.back();
         zero_in_degree.pop_back();
         visited_count++;
+
+        // early termination
+        if (visited_count == total_nodes) {
+            dag_cache_result = true;
+            dag_cache_valid = true;
+            return true;
+        }
 
         Node* node = nodes[node_id];
         for (const auto& child_pair : node->get_children()) {
@@ -82,7 +102,9 @@ bool Graph::is_dag() {
         }
     }
 
-    return static_cast<size_t>(visited_count) == nodes.size();
+    dag_cache_result = (visited_count == total_nodes);
+    dag_cache_valid = true;
+    return dag_cache_result;
 }
 
 void Graph::print_graph() const {
@@ -106,15 +128,25 @@ bool Graph::add_node(const std::string& id) {
         return false;
     }
     nodes[id] = new Node(id);
+    invalidate_caches();
     return true;
 }
 
 bool Graph::add_node_set(const std::vector<std::string>& ids) {
     bool all_added = true;
+    bool any_added = false;
+
     for (const std::string& id : ids) {
-        if (!add_node(id)) {
+        if (nodes.find(id) == nodes.end()) {
+            nodes[id] = new Node(id);
+            any_added = true;
+        } else {
             all_added = false;
         }
+    }
+
+    if (any_added) {
+        invalidate_caches();
     }
     return all_added;
 }
@@ -127,16 +159,24 @@ bool Graph::remove_node(const std::string& id) {
 
     Node* node_to_remove = it->second;
 
+    auto children_copy = node_to_remove->get_children();
+    for (const auto& [child, weight] : children_copy) {
+        node_to_remove->remove_edge(child);  // This properly updates parent counts
+    }
+
     for (auto& pair : nodes) {
         Node* node = pair.second;
-        const auto& children = node->get_children();
-        if (children.find(node_to_remove) != children.end()) {
-            node->remove_edge(node_to_remove);
+        if (node != node_to_remove) {
+            const auto& children = node->get_children();
+            if (children.find(node_to_remove) != children.end()) {
+                node->remove_edge(node_to_remove);
+            }
         }
     }
 
     delete node_to_remove;
     nodes.erase(it);
+    invalidate_caches();
     return true;
 }
 
@@ -146,7 +186,11 @@ bool Graph::add_edge(const std::string& from_id, const std::string& to_id, int w
     if (from_it == nodes.end() || to_it == nodes.end()) {
         return false;
     }
-    return from_it->second->add_edge(to_it->second, weight);
+    bool result = from_it->second->add_edge(to_it->second, weight);
+    if (result) {
+        invalidate_caches();
+    }
+    return result;
 }
 
 bool Graph::add_edge_set(const std::string& from_id, const std::vector<std::string>& to_ids,
@@ -156,13 +200,22 @@ bool Graph::add_edge_set(const std::string& from_id, const std::vector<std::stri
     if (from_it == nodes.end()) {
         return false;
     }
+
     bool all_added = true;
+    bool any_added = false;
+
     for (size_t i = 0; i < to_ids.size(); ++i) {
         int weight = use_zero_weights ? 0 : weights[i];
         auto to_it = nodes.find(to_ids[i]);
-        if (to_it == nodes.end() || !from_it->second->add_edge(to_it->second, weight)) {
+        if (to_it != nodes.end() && from_it->second->add_edge(to_it->second, weight)) {
+            any_added = true;
+        } else {
             all_added = false;
         }
+    }
+
+    if (any_added) {
+        invalidate_caches();
     }
     return all_added;
 }
@@ -173,7 +226,11 @@ bool Graph::remove_edge(const std::string& from_id, const std::string& to_id) {
     if (from_it == nodes.end() || to_it == nodes.end()) {
         return false;
     }
-    return from_it->second->remove_edge(to_it->second);
+    bool result = from_it->second->remove_edge(to_it->second);
+    if (result) {
+        invalidate_caches();
+    }
+    return result;
 }
 
 bool Graph::change_edge_weight(const std::string& from_id, const std::string& to_id,
@@ -183,7 +240,8 @@ bool Graph::change_edge_weight(const std::string& from_id, const std::string& to
     if (from_it == nodes.end() || to_it == nodes.end()) {
         return false;
     }
-    return from_it->second->change_edge_weight(to_it->second, new_weight);
+    bool result = from_it->second->change_edge_weight(to_it->second, new_weight);
+    return result;
 }
 
 Node* Graph::get_node(const std::string& id) const {
@@ -194,20 +252,20 @@ Node* Graph::get_node(const std::string& id) const {
     return nullptr;
 }
 
-inline int Graph::get_num_nodes() const { return nodes.size(); }
+int Graph::get_num_nodes() const { return static_cast<int>(nodes.size()); }
 
 const std::unordered_map<std::string, Node*>& Graph::get_nodes() const { return nodes; }
 
-bool operator==(const Graph& lhs, const Graph& rhs) {
-    if (lhs.get_num_nodes() != rhs.get_num_nodes()) {
+bool Graph::operator==(const Graph& other) const {
+    if (get_num_nodes() != other.get_num_nodes()) {
         return false;
     }
 
-    for (const auto& pair : lhs.get_nodes()) {
+    for (const auto& pair : nodes) {
         const std::string& node_id = pair.first;
-        Node* lhs_node = pair.second;
-        Node* rhs_node = rhs.get_node(node_id);
-        if (!rhs_node || *lhs_node != *rhs_node) {
+        Node* this_node = pair.second;
+        Node* other_node = other.get_node(node_id);
+        if (!other_node || *this_node != *other_node) {
             return false;
         }
     }
@@ -216,15 +274,16 @@ bool operator==(const Graph& lhs, const Graph& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Graph& graph) {
-    std::vector<Node*> node_list(graph.nodes.size());
+    const auto& nodes_map = graph.get_nodes();
+    std::vector<Node*> node_list(nodes_map.size());
     int idx = 0;
-    for (const auto& [_, node] : graph.nodes) {
+    for (const auto& [_, node] : nodes_map) {
         node_list[idx++] = node;
     }
     std::sort(node_list.begin(), node_list.end(),
               [](const Node* a, const Node* b) { return a->get_id() < b->get_id(); });
     for (const auto node : node_list) {
-        os << node << "\n";
+        os << *node << "\n";
     }
     return os;
 }
@@ -246,4 +305,60 @@ void Graph::generate_diagram_file(const std::string& graph_name) const {
     outputFile.close();
 
     system(("dot -Tpng " + filename + " -o diagrams/" + filename + ".png").c_str());
+}
+
+int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
+    if (node_ids.empty()) {
+        return 0;
+    }
+
+    std::vector<Node*> nodes_to_remove;
+    nodes_to_remove.reserve(node_ids.size());
+
+    for (const std::string& id : node_ids) {
+        auto it = nodes.find(id);
+        if (it != nodes.end()) {
+            nodes_to_remove.push_back(it->second);
+        }
+    }
+
+    if (nodes_to_remove.empty()) return 0;
+
+    std::unordered_set<Node*> removal_set(nodes_to_remove.begin(), nodes_to_remove.end());
+
+    for (Node* node_to_remove : nodes_to_remove) {
+        auto children_copy = node_to_remove->get_children();
+        for (const auto& [child, weight] : children_copy) {
+            node_to_remove->remove_edge(child);
+        }
+    }
+
+    for (auto& [id, node] : nodes) {
+        if (removal_set.find(node) == removal_set.end()) {  // Not being removed
+            std::vector<Node*> edges_to_remove;
+            for (const auto& [child, weight] : node->get_children()) {
+                if (removal_set.find(child) != removal_set.end()) {
+                    edges_to_remove.push_back(child);
+                }
+            }
+            for (Node* child_to_remove : edges_to_remove) {
+                node->remove_edge(child_to_remove);
+            }
+        }
+    }
+
+    for (Node* node_to_remove : nodes_to_remove) {
+        nodes.erase(node_to_remove->get_id());
+        delete node_to_remove;
+    }
+
+    invalidate_caches();
+    return static_cast<int>(nodes_to_remove.size());
+}
+
+void Graph::reserve_nodes(size_t expected_size) { nodes.reserve(expected_size); }
+
+void Graph::invalidate_caches() const {
+    dag_cache_valid = false;
+    ++version;
 }
