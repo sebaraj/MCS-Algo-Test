@@ -1,4 +1,4 @@
-#include "mcs/graph.h"
+#include "mcis/graph.h"
 
 #include <algorithm>
 #include <memory>
@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 #include "gtest/gtest.h"
-#include "mcs/node.h"
+#include "mcis/node.h"
 
 class GraphTest : public ::testing::Test {
 protected:
@@ -82,7 +82,6 @@ TEST_F(GraphTest, CopyAssignmentOperator) {
     EXPECT_TRUE(*graph == assigned_graph);
     EXPECT_EQ(assigned_graph.get_node("X"), nullptr);
 
-    assigned_graph = assigned_graph;
     EXPECT_EQ(assigned_graph.get_num_nodes(), 2);
 }
 

@@ -10,8 +10,8 @@
 
 #include <vector>
 
+#include "mcis/graph.h"
 #include "mcis_finder.h"
-#include "mcs/graph.h"
 
 /**
  * @class BronKerboschSerial
