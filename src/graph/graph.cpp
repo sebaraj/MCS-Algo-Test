@@ -334,7 +334,7 @@ int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
     }
 
     for (auto& [id, node] : nodes) {
-        if (removal_set.find(node) == removal_set.end()) {  // Not being removed
+        if (removal_set.find(node) == removal_set.end()) {
             std::vector<Node*> edges_to_remove;
             for (const auto& [child, weight] : node->get_children()) {
                 if (removal_set.find(child) != removal_set.end()) {
@@ -361,4 +361,33 @@ void Graph::reserve_nodes(size_t expected_size) { nodes.reserve(expected_size); 
 void Graph::invalidate_caches() const {
     dag_cache_valid = false;
     ++version;
+}
+
+Graph Graph::create_mvm_graph_from_mat_vec(const std::vector<std::vector<std::string>>& mat,
+                                           const std::vector<std::string>& vec) {
+    Graph graph;
+    int rows = static_cast<int>(mat.size());
+    int cols = static_cast<int>(vec.size());
+    if (rows == 0 || cols == 0 || mat[0].size() != static_cast<size_t>(cols)) {
+        return graph;
+    }
+
+    return graph;
+}
+
+Graph Graph::create_mvm_graph_from_dimensions(int m, int n) {
+    if (m <= 0 || n <= 0) {
+        return Graph();
+    }
+    std::vector<std::vector<std::string>> mat(m, std::vector<std::string>(n));
+    std::vector<std::string> vec(n);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            mat[i][j] = "m" + std::to_string(i) + std::to_string(j);
+        }
+    }
+    for (int j = 0; j < n; ++j) {
+        vec[j] = "v" + std::to_string(j);
+    }
+    return create_mvm_graph_from_mat_vec(mat, vec);
 }

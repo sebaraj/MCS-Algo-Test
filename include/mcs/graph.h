@@ -221,6 +221,25 @@ public:
     int get_version() const {
         return version;
     }
+
+    /**
+     * @brief Static factory method for MVM dataflow CDAG creation from actual matrix and vector
+     * @param mat 2D vector representing the matrix
+     * @param vec 1D vector representing the vector
+     * @return Graph representing the MVM dataflow CDAG
+     */
+    [[nodiscard]]
+    static Graph create_mvm_graph_from_mat_vec(const std::vector<std::vector<std::string>>& mat,
+                                               const std::vector<std::string>& vec);
+
+    /**
+     * @brief Static factory method for MVM dataflow CDAG creation from matrix dimensions
+     * @param m Number of rows in the matrix
+     * @param n Number of columns in the matrix
+     * @return Graph representing the MVM dataflow CDAG
+     */
+    [[nodiscard]]
+    static Graph create_mvm_graph_from_dimensions(int m, int n);
 };
 
 #endif  // GRAPH_H
