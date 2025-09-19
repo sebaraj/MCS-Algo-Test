@@ -14,13 +14,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
-      - name: Build & Test
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and Test
         run: |
           mkdir build
           cd build
           conan profile detect
           conan install .. --build=missing -of . -v -g CMakeToolchain -g CMakeDeps
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake 
           cmake --build .
           ninja test
