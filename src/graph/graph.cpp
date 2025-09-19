@@ -1,4 +1,5 @@
 #include <mcis/graph.h>
+#include <omp.h>
 
 #include <cstddef>
 #include <cstdlib>
@@ -8,6 +9,8 @@
 #include <unordered_set>
 
 #include "time.h"
+
+constexpr int MVM_PARALLEL_THRESHOLD = 100;
 
 Graph::Graph() = default;
 
@@ -372,6 +375,51 @@ Graph Graph::create_mvm_graph_from_mat_vec(const std::vector<std::vector<std::st
         return graph;
     }
 
+    graph.reserve_nodes(rows * cols + cols + rows * cols + rows);
+
+    std::vector<std::string> all_node_ids;
+    all_node_ids.reserve(rows * cols + cols + rows * cols + rows);
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            all_node_ids.push_back(mat[i][j]);
+        }
+    }
+
+    for (int j = 0; j < cols; ++j) {
+        all_node_ids.push_back(vec[j]);
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
+            all_node_ids.push_back(prod_id);
+        }
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        std::string result_id = "result_" + std::to_string(i);
+        all_node_ids.push_back(result_id);
+    }
+
+    graph.add_node_set(all_node_ids);
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
+            graph.add_edge(mat[i][j], prod_id, 1);
+            graph.add_edge(vec[j], prod_id, 1);
+        }
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        std::string result_id = "result_" + std::to_string(i);
+        for (int j = 0; j < cols; ++j) {
+            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
+            graph.add_edge(prod_id, result_id, 1);
+        }
+    }
+
     return graph;
 }
 
@@ -381,13 +429,32 @@ Graph Graph::create_mvm_graph_from_dimensions(int m, int n) {
     }
     std::vector<std::vector<std::string>> mat(m, std::vector<std::string>(n));
     std::vector<std::string> vec(n);
-    for (int i = 0; i < m; ++i) {
+
+    const bool use_parallel = (m * n >= MVM_PARALLEL_THRESHOLD);
+
+    if (use_parallel) {
+#pragma omp parallel for collapse(2)
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
+            }
+        }
+
+#pragma omp parallel for
         for (int j = 0; j < n; ++j) {
-            mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
+            vec[j] = "v" + std::to_string(j);
+        }
+    } else {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
+            }
+        }
+
+        for (int j = 0; j < n; ++j) {
+            vec[j] = "v" + std::to_string(j);
         }
     }
-    for (int j = 0; j < n; ++j) {
-        vec[j] = "v" + std::to_string(j);
-    }
+
     return create_mvm_graph_from_mat_vec(mat, vec);
 }

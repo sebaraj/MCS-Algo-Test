@@ -8,3 +8,6 @@ target_include_directories(mcis
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+find_package(OpenMP REQUIRED CONFIG)
+target_link_libraries(mcis PUBLIC OpenMP::OpenMP)

@@ -86,10 +86,10 @@ mkdir build && cd build
 
 # Install dependencies with Conan
 conan profile detect
-conan install .. --build=missing -of . -v -g CMakeToolchain -g CMakeDeps
+conan install .. --build=missing -of . -v
 
 # Configure with CMake
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DOpenMP_ROOT=.
 
 # Build the project
 cmake --build .

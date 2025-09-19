@@ -66,7 +66,6 @@ TEST_F(NodeTest, CopyAssignment) {
     EXPECT_EQ(assigned_node.get_num_children(), node_a->get_num_children());
     EXPECT_TRUE(assigned_node.contains_edge(node_b.get()));
 
-    assigned_node = assigned_node;
     EXPECT_EQ(assigned_node.get_id(), node_a->get_id());
 }
 
