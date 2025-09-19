@@ -26,6 +26,22 @@ private:
      */
     std::unordered_map<std::string, Node*> nodes;
 
+    /**
+     * @brief Cache for frequently accessed data to improve performance.
+     */
+    mutable bool dag_cache_valid = false;
+    mutable bool dag_cache_result = false;
+    mutable int version = 0;  // Track modifications to invalidate caches
+
+    /**
+     * @brief Invalidates all caches when the graph is modified.
+     */
+    void invalidate_caches() const {
+        dag_cache_valid = false;
+        ++version;
+    }
+
+
 public:
     /**
      * @brief Default constructor that initializes an empty graph.
@@ -183,6 +199,30 @@ public:
      * @param filename Name of the output graph name
      */
     void generate_diagram_file(const std::string& graph_name) const;
+
+    /**
+     * @brief Bulk operations for better performance with large datasets.
+     */
+
+    /**
+     * @brief Removes multiple nodes efficiently in a single operation.
+     * @param node_ids Vector of node IDs to remove.
+     * @return Number of nodes successfully removed.
+     */
+    int remove_nodes_bulk(const std::vector<std::string>& node_ids);
+
+    /**
+     * @brief Reserves memory for expected number of nodes to reduce allocations.
+     * @param expected_size Expected number of nodes.
+     */
+    void reserve_nodes(size_t expected_size);
+
+    /**
+     * @brief Gets the current version/revision of the graph for change tracking.
+     * @return Current version number.
+     */
+    [[nodiscard]]
+    int get_version() const { return version; }
 };
 
 #endif  // GRAPH_H
