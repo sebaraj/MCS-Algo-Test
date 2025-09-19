@@ -1,6 +1,8 @@
 #include <mcs/node.h>
 
+#include <algorithm>
 #include <iomanip>
+#include <vector>
 
 Node::Node(const std::string& id) : id(std::move(id)), num_parents(0), num_children(0) {};
 
@@ -87,8 +89,8 @@ bool Node::is_source() const { return num_parents == 0; }
 bool Node::is_sink() const { return num_children == 0; }
 
 bool Node::operator==(const Node& other) const {
-    bool same = num_parents == other.num_parents && id == other.id
-                && num_children == other.num_children;
+    bool same
+        = num_parents == other.num_parents && id == other.id && num_children == other.num_children;
 
     for (const auto& [child, weight] : children) {
         auto it = other.children.find(child);
@@ -110,7 +112,7 @@ std::ostream& operator<<(std::ostream& os, const Node& node) {
     for (const auto& [key, _] : node.children) {
         keys[idx++] = key;
     }
-    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
+    std::sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->id < b->id; });
     for (const auto key : keys) {
         os << std::quoted(key->id) << "(" << node.children.at(key) << ") ";
     }
@@ -128,7 +130,7 @@ void Node::print_full() const {
     for (const auto& [key, _] : children) {
         keys[idx++] = key;
     }
-    sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
+    std::sort(keys.begin(), keys.end(), [](Node* a, Node* b) { return a->get_id() < b->get_id(); });
     for (const auto key : keys) {
         std::cout << "  Child ID: " << key->get_id() << ", Weight: " << children.at(key) << "\n";
     }
