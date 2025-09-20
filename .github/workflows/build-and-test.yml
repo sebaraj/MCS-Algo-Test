@@ -5,10 +5,7 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  cpp-linter:
-    uses: ./.github/workflows/cpp-linter.yml
   build:
-    needs: cpp-linter
     runs-on: ubuntu-latest
     container:
       image: bryanwsebaraj/mcis-bci:latest
