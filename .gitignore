@@ -3,4 +3,4 @@ html
 latex
 .cache
 CMakeUserPresets.json
-
+.DS_Store

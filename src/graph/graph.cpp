@@ -1,16 +1,6 @@
 #include <mcis/graph.h>
-#include <omp.h>
-
-#include <cstddef>
-#include <cstdlib>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <unordered_set>
 
 #include "time.h"
-
-constexpr int MVM_PARALLEL_THRESHOLD = 100;
 
 Graph::Graph() = default;
 
@@ -189,6 +179,7 @@ bool Graph::add_edge(const std::string& from_id, const std::string& to_id, int w
     if (from_it == nodes.end() || to_it == nodes.end()) {
         return false;
     }
+    is_weighted = is_weighted || (weight != 0);
     bool result = from_it->second->add_edge(to_it->second, weight);
     if (result) {
         invalidate_caches();
@@ -293,21 +284,31 @@ std::ostream& operator<<(std::ostream& os, const Graph& graph) {
 
 void Graph::generate_diagram_file(const std::string& graph_name) const {
     // https://www.graphviz.org/pdf/dotguide.pdf
-    std::string filename = currentDateTime() + "_" + graph_name + ".gv";
-    std::string path = "diagrams/" + filename;
-    std::ofstream outputFile(path);
+    std::string filename = currentDateTime() + "_" + graph_name;
+    std::string dotpath = "../../dot/" + filename + ".gv";
+    std::string diagrampath = "../../diagrams/" + filename + ".png";
+    std::ofstream outputFile(dotpath);
 
     outputFile << "digraph G {\n";
-    for (const auto& [_, node] : nodes) {
-        for (const auto& [child, weight] : node->get_children()) {
-            outputFile << "    " << std::quoted(node->get_id()) << " -> "
-                       << std::quoted(child->get_id()) << " [label=\"" << weight << "\"];\n";
+    if (!is_weighted) {
+        for (const auto& [_, node] : nodes) {
+            for (const auto& [child, weight] : node->get_children()) {
+                outputFile << "    " << std::quoted(node->get_id()) << " -> "
+                           << std::quoted(child->get_id()) << ";\n";
+            }
+        }
+    } else {
+        for (const auto& [_, node] : nodes) {
+            for (const auto& [child, weight] : node->get_children()) {
+                outputFile << "    " << std::quoted(node->get_id()) << " -> "
+                           << std::quoted(child->get_id()) << " [label=\"" << weight << "\"];\n";
+            }
         }
     }
     outputFile << "}\n";
     outputFile.close();
 
-    system(("dot -Tpng " + filename + " -o diagrams/" + filename + ".png").c_str());
+    system(("dot -Tpng " + dotpath + " -o " + diagrampath).c_str());
 }
 
 int Graph::remove_nodes_bulk(const std::vector<std::string>& node_ids) {
@@ -364,97 +365,4 @@ void Graph::reserve_nodes(size_t expected_size) { nodes.reserve(expected_size); 
 void Graph::invalidate_caches() const {
     dag_cache_valid = false;
     ++version;
-}
-
-Graph Graph::create_mvm_graph_from_mat_vec(const std::vector<std::vector<std::string>>& mat,
-                                           const std::vector<std::string>& vec) {
-    Graph graph;
-    int rows = static_cast<int>(mat.size());
-    int cols = static_cast<int>(vec.size());
-    if (rows == 0 || cols == 0 || mat[0].size() != static_cast<size_t>(cols)) {
-        return graph;
-    }
-
-    graph.reserve_nodes(rows * cols + cols + rows * cols + rows);
-
-    std::vector<std::string> all_node_ids;
-    all_node_ids.reserve(rows * cols + cols + rows * cols + rows);
-
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            all_node_ids.push_back(mat[i][j]);
-        }
-    }
-
-    for (int j = 0; j < cols; ++j) {
-        all_node_ids.push_back(vec[j]);
-    }
-
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
-            all_node_ids.push_back(prod_id);
-        }
-    }
-
-    for (int i = 0; i < rows; ++i) {
-        std::string result_id = "result_" + std::to_string(i);
-        all_node_ids.push_back(result_id);
-    }
-
-    graph.add_node_set(all_node_ids);
-
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
-            graph.add_edge(mat[i][j], prod_id, 1);
-            graph.add_edge(vec[j], prod_id, 1);
-        }
-    }
-
-    for (int i = 0; i < rows; ++i) {
-        std::string result_id = "result_" + std::to_string(i);
-        for (int j = 0; j < cols; ++j) {
-            std::string prod_id = "prod_" + std::to_string(i) + "_" + std::to_string(j);
-            graph.add_edge(prod_id, result_id, 1);
-        }
-    }
-
-    return graph;
-}
-
-Graph Graph::create_mvm_graph_from_dimensions(int m, int n) {
-    if (m <= 0 || n <= 0) {
-        return Graph();
-    }
-    std::vector<std::vector<std::string>> mat(m, std::vector<std::string>(n));
-    std::vector<std::string> vec(n);
-
-    const bool use_parallel = (m * n >= MVM_PARALLEL_THRESHOLD);
-
-    if (use_parallel) {
-#pragma omp parallel for collapse(2)
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
-            }
-        }
-
-#pragma omp parallel for
-        for (int j = 0; j < n; ++j) {
-            vec[j] = "v" + std::to_string(j);
-        }
-    } else {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                mat[i][j] = "m" + std::to_string(i) + "," + std::to_string(j);
-            }
-        }
-
-        for (int j = 0; j < n; ++j) {
-            vec[j] = "v" + std::to_string(j);
-        }
-    }
-
-    return create_mvm_graph_from_mat_vec(mat, vec);
 }
