@@ -1,4 +1,4 @@
-name: Build and Test MCIS-BCI Library
+name: Build and Test
 on:
   push:
     branches: [main]

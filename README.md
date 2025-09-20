@@ -8,7 +8,10 @@ _Yale University • CPSC 4900_
 [![C++](https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=cplusplus)](https://en.cppreference.com/w/cpp/20)
 [![CMake](https://img.shields.io/badge/CMake-3.22+-green.svg?style=flat&logo=cmake)](https://cmake.org/)
 [![GTest](https://img.shields.io/badge/Testing-Google%20Test-red.svg?style=flat)](https://github.com/google/googletest)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)\
+[![cpp-linter](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml)
+[![cpp-linter](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml)
+[![Build and Test](https://github.com/sebaraj/MCIS-BCI/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/build-and-test.yml)
 
 </div>
 
@@ -61,17 +64,22 @@ Ensure you have the following dependencies installed:
 - **C++ Compiler**: Supporting C++20 standard
   - GCC 10+ / Clang 12+ / MSVC 2019+
 - **CMake**: Version 3.22.1 or higher
+- **Conan**: C++ package manager
+- **Ninja**: Build system
 - **Graphviz (dot)**: For graph visualization (optional)
+- **Doxygen**: For documentation generation (optional)
 
 ```bash
 # macOS
-brew install cmake graphviz
+brew install cmake conan ninja graphviz doxygen
 
 # Ubuntu/Debian
-sudo apt install cmake graphviz
+sudo apt update
+sudo apt install cmake graphviz ninja-build python3 python3-pip doxygen
+pip install conan
 
 # Windows (using Chocolatey)
-choco install cmake graphviz
+choco install cmake conan ninja graphviz doxygen.install
 ```
 
 ### Building the Project
@@ -80,6 +88,9 @@ choco install cmake graphviz
 # Clone the repository
 git clone https://github.com/sebaraj/MCIS-BCI.git
 cd MCIS-BCI
+
+# Create directories for graph outputs (optional)
+mkdir dot && mkdir diagrams
 
 # Create build directory
 mkdir build && cd build
@@ -154,8 +165,21 @@ ctest --verbose --parallel 4
 # Specific test categories
 ctest -R NodeTest
 ctest -R GraphTest
+ctest -R MVMTest
+ctest -R DWTTest
+ctest -R FFTTest
 ctest -R AlgorithmTest
 ctest -R BenchmarkTest
+
+# Run a specific test executable directly
+ctest -R MVMTest.MVM2x2GraphCreation --verbose
+
+# Test and generate a png of the generated CDAG
+# Currently only works for MVM, DWT, and FFT tests
+# dot (.gv) files are saved in the `./dot/` directory
+# diagrams (.png) files are saved in the `./diagrams/` directory
+GENERATE_DIAGRAMS=1 ctest -R MVMTest -R MVMTest.MVM2x2GraphCreation
+GENERATE_DIAGRAMS=1 ctest -R DWTTest
 ```
 
 ---

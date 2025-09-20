@@ -8,11 +8,21 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <omp.h>
+
+#include <cstddef>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "node.h"
+
+constexpr int MVM_PARALLEL_THRESHOLD = 100;
 
 /**
  * @class Graph
@@ -31,12 +41,17 @@ private:
      */
     mutable bool dag_cache_valid = false;
     mutable bool dag_cache_result = false;
-    mutable int version = 0;  // Track modifications to invalidate caches
+    mutable int version = 0;
 
     /**
      * @brief Invalidates all caches when the graph is modified.
      */
     void invalidate_caches() const;
+
+    /**
+     * @brief Indicates if the graph is weighted (edges have weights).
+     */
+    bool is_weighted = false;
 
 public:
     /**
