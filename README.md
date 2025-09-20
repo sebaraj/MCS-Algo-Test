@@ -8,7 +8,10 @@ _Yale University • CPSC 4900_
 [![C++](https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=cplusplus)](https://en.cppreference.com/w/cpp/20)
 [![CMake](https://img.shields.io/badge/CMake-3.22+-green.svg?style=flat&logo=cmake)](https://cmake.org/)
 [![GTest](https://img.shields.io/badge/Testing-Google%20Test-red.svg?style=flat)](https://github.com/google/googletest)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)\
+[![cpp-linter](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml)
+[![cpp-linter](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/cpp-linter.yml)
+[![Build and Test](https://github.com/sebaraj/MCIS-BCI/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/sebaraj/MCIS-BCI/actions/workflows/build-and-test.yml)
 
 </div>
 
